@@ -1,3 +1,5 @@
+scriptencoding utf-8
+
 Describe lsp#utils#diff
 
     Describe lsp#utils#diff#compute
@@ -78,6 +80,130 @@ Describe lsp#utils#diff
             \  },
             \  'text': '',
             \  "rangeLength": 12
+            \}
+            let got = lsp#utils#diff#compute(lines1, lines2)
+            Assert Equals(got, want)
+        End
+
+        It should return diff of one multibyte letter
+            let lines1 = [
+            \  'foo',
+            \  'br',
+            \  'baz',
+            \]
+            let lines2 = [
+            \  'foo',
+            \  'bÅr',
+            \  'baz',
+            \]
+            let want = {
+            \  'range': {
+            \    'start': { 'line': 1, 'character': 1 },
+            \    'end': { 'line': 1, 'character': 1 },
+            \  },
+            \  'text': 'Å',
+            \  'rangeLength': 0
+            \}
+            let got = lsp#utils#diff#compute(lines1, lines2)
+            Assert Equals(got, want)
+
+            let lines1 = [
+            \  'foo',
+            \  'bÅr',
+            \  'baz',
+            \]
+            let lines2 = [
+            \  'foo',
+            \  'br',
+            \  'baz',
+            \]
+            let want = {
+            \  'range': {
+            \    'start': { 'line': 1, 'character': 1 },
+            \    'end': { 'line': 1, 'character': 2 },
+            \  },
+            \  'text': '',
+            \  'rangeLength': 1
+            \}
+            let got = lsp#utils#diff#compute(lines1, lines2)
+            Assert Equals(got, want)
+        End
+
+        It should return diff of multi-lines including multibyte letters
+            let lines1 = [
+            \  'foo',
+            \  'bar',
+            \  'baz',
+            \]
+            let lines2 = [
+            \  'Ψoo',
+            \  'baΓ',
+            \  'baz',
+            \]
+            let want = {
+            \  'range': {
+            \    'start': { 'line': 0, 'character': 0 },
+            \    'end': { 'line': 1, 'character': 3 },
+            \  },
+            \  'text': "Ψoo\nbaΓ",
+            \  'rangeLength': 7
+            \}
+            let got = lsp#utils#diff#compute(lines1, lines2)
+            Assert Equals(got, want)
+
+            let lines1 = [
+            \  'Ψoo',
+            \  'baΓ',
+            \  'baz',
+            \]
+            let lines2 = [
+            \  'foo',
+            \  'bar',
+            \  'baz',
+            \]
+            let want = {
+            \  'range': {
+            \    'start': { 'line': 0, 'character': 0 },
+            \    'end': { 'line': 1, 'character': 3 },
+            \  },
+            \  'text': "foo\nbar",
+            \  'rangeLength': 7
+            \}
+            let got = lsp#utils#diff#compute(lines1, lines2)
+            Assert Equals(got, want)
+
+            let lines1 = [
+            \  'foo',
+            \]
+            let lines2 = [
+            \  'foo',
+            \  'baΓ',
+            \]
+            let want = {
+            \  'range': {
+            \    'start': { 'line': 0, 'character': 3 },
+            \    'end': { 'line': 0, 'character': 3 },
+            \  },
+            \  'text': "\nbaΓ",
+            \  'rangeLength': 0
+            \}
+            let got = lsp#utils#diff#compute(lines1, lines2)
+            Assert Equals(got, want)
+
+            let lines1 = [
+            \  'foo',
+            \  'baΓ',
+            \]
+            let lines2 = [
+            \  'foo',
+            \]
+            let want = {
+            \  'range': {
+            \    'start': { 'line': 0, 'character': 3 },
+            \    'end': { 'line': 1, 'character': 3 },
+            \  },
+            \  'text': '',
+            \  'rangeLength': 4
             \}
             let got = lsp#utils#diff#compute(lines1, lines2)
             Assert Equals(got, want)
